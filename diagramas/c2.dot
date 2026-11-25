@@ -1,0 +1,37 @@
+digraph C2 {
+  graph [rankdir=TB, fontname="DejaVu Sans", nodesep=0.45, ranksep=0.75, pad=0.2, bgcolor="white", compound=true, labelloc=t, fontsize=13, label=<<b>C4 · Nivel 2 — Contenedores de REPARA+</b>>];
+  node [fontname="DejaVu Sans", fontsize=9.5, style="filled,rounded", shape=box, margin="0.18,0.1", fillcolor="#438dd5", fontcolor=white];
+  edge [fontname="DejaVu Sans", fontsize=8.5, color="#47617f", fontcolor="#33475f"];
+
+  oficina [label=<<b>Personal de oficina</b><br/><font point-size="8">Asesor · coordinador · facturación · gerente</font>>, fillcolor="#08427b"];
+  cliente [label=<<b>Cliente</b>>, fillcolor="#08427b"];
+  tecnico [label=<<b>Técnico de campo</b><br/><font point-size="8">Celular Android</font>>, fillcolor="#08427b"];
+
+  subgraph cluster_cli {
+    label=<<b>Navegador / celular del usuario</b>>; fontsize=10; style="rounded,dashed"; color="#7a8fa6"; fontname="DejaVu Sans";
+    {rank=same; web; pwa}
+    web [label=<<b>Web de oficina</b><br/><font point-size="8">SPA React + Vite (TypeScript)<br/>Incluye la consulta pública del cliente</font>>];
+    pwa [label=<<b>App del técnico (PWA)</b><br/><font point-size="8">React PWA instalable · Service Worker<br/>IndexedDB (Dexie) · cola local (outbox)</font>>];
+  }
+  subgraph cluster_sys {
+    label=<<b>REPARA+ — servidor (contenedores Docker en un servidor o PaaS)</b>>; fontsize=10; style="rounded,dashed"; color="#47617f"; fontname="DejaVu Sans";
+    caddy [label=<<b>Proxy inverso Caddy</b><br/><font point-size="8">HTTPS automático · sirve la web y la PWA<br/>enruta /api al backend</font>>, fillcolor="#2e6da4"];
+    api [label=<<b>Backend: monolito modular</b><br/><font point-size="8">Node.js + NestJS · API REST · JWT + RBAC<br/>6 módulos comunicados por eventos internos</font>>, fillcolor="#1168bd"];
+    worker [label=<<b>Worker de tareas</b><br/><font point-size="8">Proceso Node.js separado<br/>Cola pg-boss · envío con reintentos</font>>, fillcolor="#2e6da4"];
+    {rank=same; api; worker}
+    db [label=<<b>PostgreSQL 16</b><br/><font point-size="8">Única fuente de verdad · ACID<br/>Cola pg-boss · copias diarias</font>>, shape=cylinder, fillcolor="#1f4e79"];
+  }
+
+  msg [label=<<b>Proveedores de mensajería</b><br/><font point-size="8">Web Push · correo · SMS<br/>(WhatsApp Business: fase posterior)</font>>, fillcolor="#999999"];
+
+  oficina -> web [label="HTTPS"];
+  cliente -> web [label="HTTPS\n(solo consulta)"];
+  tecnico -> pwa [label="Usa"];
+  web -> caddy [label="HTTPS · REST · JWT"];
+  pwa -> caddy [label="HTTPS · comandos idempotentes\n(UUID) al recuperar conexión"];
+  caddy -> api [label="/api"];
+  api -> db [label="SQL transaccional (Prisma)"];
+  worker -> db [label="Lee la cola pg-boss"];
+  worker -> msg [label="Web Push al técnico,\ncorreo y SMS al cliente"];
+  {rank=same; oficina; cliente; tecnico}
+}

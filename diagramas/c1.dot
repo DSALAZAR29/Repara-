@@ -1,0 +1,29 @@
+digraph C1 {
+  graph [rankdir=TB, fontname="DejaVu Sans", nodesep=0.5, ranksep=0.9, pad=0.2, bgcolor="white", labelloc=t, fontsize=13, label=<<b>C4 · Nivel 1 — Contexto del sistema REPARA+</b>>];
+  node [fontname="DejaVu Sans", fontsize=10, style="filled,rounded", shape=box, margin="0.2,0.12"];
+  edge [fontname="DejaVu Sans", fontsize=8.5, color="#47617f", fontcolor="#33475f"];
+
+  cliente [label=<<b>Cliente</b><br/><font point-size="8">Solicita el servicio y consulta<br/>el estado de su orden</font>>, fillcolor="#08427b", fontcolor=white, shape=box];
+  asesor [label=<<b>Asesor de atención</b><br/><font point-size="8">Registra las solicitudes</font>>, fillcolor="#08427b", fontcolor=white];
+  coord [label=<<b>Coordinador de despacho</b><br/><font point-size="8">Asigna y programa técnicos</font>>, fillcolor="#08427b", fontcolor=white];
+  tecnico [label=<<b>Técnico de campo</b><br/><font point-size="8">Atiende y cierra órdenes<br/>en el domicilio</font>>, fillcolor="#08427b", fontcolor=white];
+  fact [label=<<b>Auxiliar de facturación</b><br/><font point-size="8">Revisa órdenes cerradas<br/>y las marca como facturadas</font>>, fillcolor="#08427b", fontcolor=white];
+  gerente [label=<<b>Gerente / administrador</b><br/><font point-size="8">Consulta reportes y administra<br/>usuarios (por validar)</font>>, fillcolor="#08427b", fontcolor=white];
+
+  repara [label=<<b>REPARA+</b><br/><font point-size="9">Sistema BPM de gestión de solicitudes<br/>y seguimiento de servicio técnico<br/>a domicilio (Tecno Soluciones S.A.S.)</font>>, fillcolor="#1168bd", fontcolor=white, fontsize=12, margin="0.4,0.25"];
+
+  msg [label=<<b>Proveedores de mensajería</b><br/><font point-size="8">Web Push, correo y SMS.<br/>WhatsApp Business en fase posterior</font>>, fillcolor="#999999", fontcolor=white];
+  geo [label=<<b>Servicio de geocodificación</b><br/><font point-size="8">Validación de direcciones<br/>(opcional, RNF07; por definir)</font>>, fillcolor="#999999", fontcolor=white, style="filled,rounded,dashed"];
+
+  cliente -> repara [label="Consulta estado\n(número de orden + teléfono)"];
+  asesor -> repara [label="Registra solicitudes"];
+  coord -> repara [label="Asigna y reprograma"];
+  tecnico -> repara [label="Ve órdenes, registra\ndiagnóstico y cierre"];
+  fact -> repara [label="Gestiona bandeja\nde facturación"];
+  gerente -> repara [label="Reportes y\nadministración"];
+  repara -> msg [label="Envía avisos al cliente\ny al técnico"];
+  repara -> geo [label="Valida direcciones", style=dashed];
+  {rank=same; cliente; asesor; coord}
+  {rank=same; tecnico; fact; gerente}
+  {rank=same; msg; geo}
+}

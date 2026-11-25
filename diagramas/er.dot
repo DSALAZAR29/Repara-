@@ -1,0 +1,89 @@
+digraph ER {
+  graph [rankdir=LR, fontname="DejaVu Sans", nodesep=0.35, ranksep=0.9, pad=0.2, splines=true, bgcolor="white"];
+  node [shape=plain, fontname="DejaVu Sans", fontsize=10];
+  edge [fontname="DejaVu Sans", fontsize=8, dir=both, arrowtail=tee, arrowhead=crow, color="#47617f", penwidth=1.1];
+
+  rol [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>rol</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>nombre<br align="left"/></td></tr></table>>];
+
+  usuario [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>usuario</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>rol_id (FK)<br align="left"/>nombre, correo (UK)<br align="left"/>password_hash (argon2)<br align="left"/>intentos_fallidos<br align="left"/>bloqueado_hasta, activo<br align="left"/></td></tr></table>>];
+
+  zona [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>zona</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>nombre<br align="left"/></td></tr></table>>];
+
+  especialidad [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>especialidad</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>nombre<br align="left"/></td></tr></table>>];
+
+  categoria_equipo [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>categoria_equipo</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>especialidad_id (FK)<br align="left"/>nombre (nevera, lavadora…)<br align="left"/></td></tr></table>>];
+
+  tecnico [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>tecnico</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>usuario_id (FK, UK)<br align="left"/>zona_id (FK)<br align="left"/>turno_activo, activo<br align="left"/></td></tr></table>>];
+
+  tecnico_especialidad [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>tecnico_especialidad</b></td></tr>
+    <tr><td align="left"><u>tecnico_id</u> (PK, FK)<br align="left"/><u>especialidad_id</u> (PK, FK)<br align="left"/></td></tr></table>>];
+
+  cliente [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>cliente</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>nombre<br align="left"/>telefono (10 dígitos)<br align="left"/>correo<br align="left"/></td></tr></table>>];
+
+  orden [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="#fff7e0">
+    <tr><td bgcolor="#f3d98b" align="left"><b>orden_servicio</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>numero (UK) REP-AAAA-NNNNN<br align="left"/>cliente_id, zona_id (FK)<br align="left"/>categoria_id, creada_por (FK)<br align="left"/>direccion, marca, falla<br align="left"/>franja_solicitada<br align="left"/>estado (pendiente → facturada)<br align="left"/>diagnostico, trabajo_realizado<br align="left"/>valor_servicio, nueva_visita<br align="left"/>creada_en, cerrada_en<br align="left"/>facturada_en, facturada_por (FK)<br align="left"/></td></tr></table>>];
+
+  asignacion [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>asignacion</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>orden_id, tecnico_id (FK)<br align="left"/>franja (rango de tiempo)<br align="left"/>vigente, motivo_reasignacion<br align="left"/>asignada_por (FK), asignada_en<br align="left"/><i>EXCLUDE: sin solape por técnico</i><br align="left"/></td></tr></table>>];
+
+  repuesto [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>repuesto_usado</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>orden_id (FK)<br align="left"/>descripcion, cantidad<br align="left"/></td></tr></table>>];
+
+  firma [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>firma_cliente</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>orden_id (FK, UK)<br align="left"/>imagen, firmada_en<br align="left"/>motivo_no_firma<br align="left"/></td></tr></table>>];
+
+  historial [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="#e6f2e6">
+    <tr><td bgcolor="#b9d9b9" align="left"><b>historial_estado</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>orden_id, usuario_id (FK)<br align="left"/>estado_anterior, estado_nuevo<br align="left"/>motivo, fecha_hora<br align="left"/></td></tr></table>>];
+
+  comando [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>comando_sync</b></td></tr>
+    <tr><td align="left"><u>uuid</u> (PK, generado en el celular)<br align="left"/>tecnico_id, orden_id (FK)<br align="left"/>tipo, resultado<br align="left"/>recibido_en<br align="left"/></td></tr></table>>];
+
+  notificacion [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="white">
+    <tr><td bgcolor="#d9e4f2" align="left"><b>notificacion</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>orden_id (FK)<br align="left"/>canal, destinatario<br align="left"/>estado, intentos, enviado_en<br align="left"/></td></tr></table>>];
+
+  auditoria [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="#e6f2e6">
+    <tr><td bgcolor="#b9d9b9" align="left"><b>evento_seguridad</b></td></tr>
+    <tr><td align="left"><u>id</u> (PK)<br align="left"/>usuario_id (FK, opcional)<br align="left"/>accion, resultado<br align="left"/>fecha_hora<br align="left"/></td></tr></table>>];
+
+  rol -> usuario;
+  usuario -> tecnico [arrowhead=teeodot];
+  zona -> tecnico;
+  tecnico -> tecnico_especialidad;
+  especialidad -> tecnico_especialidad;
+  especialidad -> categoria_equipo;
+  categoria_equipo -> orden;
+  zona -> orden;
+  cliente -> orden;
+  usuario -> orden [style=dashed];
+  orden -> asignacion;
+  tecnico -> asignacion;
+  orden -> repuesto;
+  orden -> firma [arrowhead=teeodot];
+  orden -> historial;
+  usuario -> historial;
+  orden -> notificacion;
+  tecnico -> comando;
+  usuario -> auditoria [arrowhead=crowodot];
+}

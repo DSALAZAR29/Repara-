@@ -1,0 +1,30 @@
+digraph C3 {
+  graph [rankdir=TB, fontname="DejaVu Sans", nodesep=0.35, ranksep=0.8, pad=0.2, bgcolor="white", compound=true, labelloc=t, fontsize=13, label=<<b>C4 · Nivel 3 — Componentes del backend (monolito modular)</b>>];
+  node [fontname="DejaVu Sans", fontsize=9.5, style="filled,rounded", shape=box, margin="0.15,0.1", fillcolor="#85bbf0", fontcolor="#0b2a4a"];
+  edge [fontname="DejaVu Sans", fontsize=8.5, color="#47617f", fontcolor="#33475f"];
+
+  api_in [label=<<b>Controladores REST</b><br/><font point-size="8">Guardas de rol (RBAC) en cada endpoint<br/>Validación con el paquete compartido (Zod)</font>>, fillcolor="#438dd5", fontcolor=white];
+
+  subgraph cluster_back {
+    label=<<b>Backend NestJS</b>>; style="rounded,dashed"; color="#47617f"; fontsize=10; fontname="DejaVu Sans";
+    id [label=<<b>Identidad y acceso</b><br/><font point-size="8">JWT corto + renovación<br/>argon2 · roles · bloqueo</font>>];
+    ord [label=<<b>Solicitudes y órdenes</b><br/><font point-size="8">Máquina de estados explícita<br/>Número por secuencia · historial</font>>];
+    des [label=<<b>Despacho</b><br/><font point-size="8">Agenda por zona y especialidad<br/>Sin solapes · reasignación</font>>];
+    cam [label=<<b>Campo y sincronización</b><br/><font point-size="8">Lotes de comandos de la PWA<br/>Idempotencia por UUID</font>>];
+    fac [label=<<b>Facturación y reportes</b><br/><font point-size="8">Consultas sobre órdenes cerradas<br/>Exportación Excel y PDF</font>>];
+    not [label=<<b>Notificaciones</b><br/><font point-size="8">Escucha eventos · encola mensajes<br/>Puertos y adaptadores por canal</font>>];
+    bus [label=<<b>Bus de eventos de dominio</b><br/><font point-size="8">Ningún módulo lee tablas de otro</font>>, fillcolor="#f3d98b"];
+  }
+  shared [label=<<b>Paquete compartido (TypeScript)</b><br/><font point-size="8">Esquemas Zod y máquina de estados<br/>usado por API, web y PWA (monorepo pnpm)</font>>, fillcolor="#cfd8e3"];
+  db [label=<<b>PostgreSQL 16</b><br/><font point-size="8">EXCLUDE sobre franja por técnico · secuencia anual<br/>historial_estado · comando_sync · cola pg-boss</font>>, shape=cylinder, fillcolor="#1f4e79", fontcolor=white];
+  worker [label=<<b>Worker de tareas</b>>, fillcolor="#2e6da4", fontcolor=white];
+
+  api_in -> id [label="autentica"];
+  api_in -> ord; api_in -> des; api_in -> cam; api_in -> fac;
+  ord -> bus [label="publica eventos"];
+  des -> bus; cam -> bus;
+  bus -> not [label="OrdenCreada,\nOrdenAsignada…"];
+  api_in -> shared [style=dotted, arrowhead=none];
+  ord -> db; des -> db; cam -> db; fac -> db; id -> db; not -> db [label="outbox"];
+  worker -> db [label="lee cola"];
+}
